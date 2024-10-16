@@ -20,7 +20,6 @@ func getNextID(devices [][2]string) string {
 	return devices[0][0]
 }
 
-// pipewire-switcher 'sof-hda-dsp Speaker + Headphones' 'USB ENC Headset Digital Stereo'
 func main() {
 	skip := flag.String("skip", "", "pipewire-switcher --skip 'sof-hda-dsp HDMI'")
 	flag.Parse()
