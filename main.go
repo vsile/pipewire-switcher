@@ -29,6 +29,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// First filter only Sinks devices
+	// re := regexp.MustCompile(`(?s)Sinks.*?├─`)
 	re := regexp.MustCompile(`(?s)Sinks.*?├─`)
 	generalMatch := re.FindSubmatch(out)
 	if len(generalMatch) == 0 {
@@ -38,12 +39,21 @@ func main() {
 	re = regexp.MustCompile(`(\*)?\s+(\d+)\.\s+.*`)
 	matches := re.FindAllSubmatch(generalMatch[0], -1)
 
+	// Devices contains the id of device and marker indicating if the device is selected
+	// For expamle: [[33 ] [42 ] [43 *] [44 ]]
 	devices := [][2]string{}
 	for _, match := range matches {
 		if *skip != "" && strings.Contains(string(match[0]), *skip) {
 			continue
 		}
 		devices = append(devices, [2]string{string(match[2]), string(match[1])})
+	}
+
+	// Add another Audio/Sink devices
+	re = regexp.MustCompile(`(\*)?\s+(\d+)\.\s+.*\[Audio/Sink\]`)
+	advancedMatch := re.FindSubmatch(out)
+	if len(advancedMatch) != 0 {
+		devices = append(devices, [2]string{string(advancedMatch[2]), string(advancedMatch[1])})
 	}
 
 	err = exec.Command("/bin/sh", "-c", "wpctl set-default "+getNextID(devices)).Run()
